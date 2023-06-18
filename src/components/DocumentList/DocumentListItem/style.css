@@ -1,0 +1,24 @@
+.ListItem-selected {
+    background-color: #555;
+    outline: 2px solid white;
+}
+
+.ListItem {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 1rem 0;
+    border-top: 1px solid white;
+    cursor: default;
+}
+
+.ListItem-content {
+    display: flex;
+    width: calc(100% - 2rem);
+    justify-content: space-between;
+}
+
+
+.ListItem-text {
+    flex: 0 0 auto;
+}

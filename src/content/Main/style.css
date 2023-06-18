@@ -1,0 +1,78 @@
+.MainContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    width: 48rem;
+    padding: 12rem 0 0 0;
+}
+
+.MainContainer-callToAction {
+    display: inline-block;
+    padding: 1rem 3rem;
+    border: 2px solid white;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.DragContainer {
+    width: 100%;
+}
+
+.App {
+    display: flex;
+    justify-content: center;
+    width: 100vw;
+    min-height: 100vh;
+    
+}
+
+.icon {
+    background-position: center;
+    background-size: cover;
+    width: 3rem;
+    height: 3rem;
+    margin-right: 0.5rem;
+}
+
+.icon-button {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    outline: 2px solid white;
+    cursor: pointer;
+}
+
+.icon-button:first-child {
+    margin-left: 1rem;
+}
+
+.download {
+    background-image: url('../../assets/icons/download.png');
+    filter: invert();
+    
+}
+
+.merge {
+    background-image: url('../../assets/icons/merge.png');
+    filter: invert();
+}
+
+.split {
+    background-image: url('../../assets/icons/split.png');
+    filter: invert();
+
+}
+
+.MainContainer-Toolbar {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    position: sticky;
+    top: 0;
+    background-color: inherit;
+    background-color: #202020;
+    padding: 2rem 1rem;
+}

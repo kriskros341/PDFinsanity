@@ -1,0 +1,26 @@
+.EmptyDocumentList-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 4rem 0;
+}
+
+.EmptyDocumentList {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+}
+
+.EmptyDocumentList-text {
+    padding: 4rem;
+}
+
+.EmptyDocumentList-callToAction {
+    padding: 4rem 12rem;
+    border: 2px solid white;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}

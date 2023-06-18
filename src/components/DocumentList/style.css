@@ -1,0 +1,15 @@
+.DocumentList {
+    width: 100%;
+    padding: 2rem 0;
+}
+
+.ListItem-selected {
+    background-color: #555;
+    outline: 2px solid white;
+}
+
+.ListItem {
+    width: 100%;
+    border-top: 1px solid white;
+    cursor: default;
+}
