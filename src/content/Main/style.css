@@ -75,4 +75,5 @@
     background-color: inherit;
     background-color: #202020;
     padding: 2rem 1rem;
+    z-index: 100;
 }

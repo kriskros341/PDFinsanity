@@ -3,22 +3,68 @@
     outline: 2px solid white;
 }
 
+.ListItem-container {
+    width: 100%;
+}
+
 .ListItem {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     width: 100%;
-    padding: 1rem 0;
-    border-top: 1px solid white;
     cursor: default;
+    position: relative;
 }
 
 .ListItem-content {
     display: flex;
     width: calc(100% - 2rem);
+    padding: 1rem 0;
     justify-content: space-between;
+    position: sticky;
+    top: 144px;
+    z-index: 100;
+    background-color: #202020;
 }
 
 
 .ListItem-text {
-    flex: 0 0 auto;
+    flex: 0 0 calc(100%-2rem);
+    width: calc(100%-2rem);
+}
+.ListItemPageTileList {
+    display: flex;
+    flex-wrap: wrap;
+}
+.ListItemPageTile {
+    width: 100px;
+    height: 150px;
+    background-color: green;
+    margin: 0.75rem;
+    z-index: 1;
+}
+
+.previewContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.thumbnailsContainer {
+    display: grid;
+    margin-left: 1rem;
+}
+
+.thumbnail {
+    display: inline-block;
+}
+
+.ListItem-PageListContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10;
+    padding: 10;
+}
+
+.PageThumbnail-container {
 }

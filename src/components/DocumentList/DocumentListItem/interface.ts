@@ -1,5 +1,7 @@
+import { FileItem } from "../../../types";
+
 export interface DocumentFileListItem {
-    text: React.ReactNode,
+    fileItem: FileItem,
     onRemove: () => void,
     isSelected: boolean,
 }

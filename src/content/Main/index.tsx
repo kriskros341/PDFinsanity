@@ -50,10 +50,6 @@ const Main = () => {
     const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
     const [ dragCounter, setDragCounter ] = useState(0)
 
-    useEffect(() => {
-
-    })
-
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,6 +57,8 @@ const Main = () => {
         if (e.target) {
             setItems([...items, ...[...e.target.files!].map(FileItem.fromFile)]);
         }
+        // @ts-ignore
+        e.target.files = [];
     }
 
     const toggleSelectedId = (id: string) => {
@@ -85,7 +83,6 @@ const Main = () => {
     }
 
     const handleItemShiftClick = (id: string) => {
-
         let startIdx = items.findIndex(item => item.id === id);
         // @TODO: have last selected item in separate state
         let endIdx = items.findIndex(item => item.id === selectedItemIds[selectedItemIds.length - 1]);  
@@ -107,7 +104,6 @@ const Main = () => {
             return handleItemShiftClick(id)
         }
         handleItemClick(id)
-        
     }
 
     const handleDrop = (e: DragEvent<HTMLFormElement>) => {
@@ -122,13 +118,11 @@ const Main = () => {
     const onDragOver = (e: DragEvent<HTMLFormElement>) => {
         e.preventDefault()
     }
-
     
     const onDragEnter = (e: DragEvent<HTMLFormElement>) => {
         e.preventDefault()
         setDragCounter(current => current+1)
     }
-
 
     const handleRemove = (id: string) => {
         setItems(files => files.filter(file => file.id != id));
@@ -146,7 +140,6 @@ const Main = () => {
         const idsToMerge = selectedItemIds.length === 0 ? items.map(item => item.id) : selectedItemIds
         const result: FileItem[] = [];
         const merger = new PDFMerger();
-        console.log('merge')
         for (let item of items) {
             console.log(idsToMerge, items)
             if (idsToMerge.find(value => value === item.id)) {

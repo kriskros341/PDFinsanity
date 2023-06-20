@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.0.8",
+    "@dnd-kit/sortable": "^7.0.2",
     "@types/react-beautiful-dnd": "^13.1.4",
     "@types/uuid": "^9.0.2",
     "pdf-lib": "^1.17.1",
@@ -17,6 +19,8 @@
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
+    "react-pdf": "^7.1.2",
+    "react-virtualized": "^9.22.5",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

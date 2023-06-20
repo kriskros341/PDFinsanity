@@ -2,40 +2,45 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import type { DocumentFileList } from './interface';
 import ListItem from './DocumentListItem';
 import './style.css'
+import { pdfjs } from 'react-pdf';
+import {
+    DndContext, 
+    closestCenter,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    useSortable,
+    arrayMove,
+    SortableContext,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.js',
+    import.meta.url,
+  ).toString();
 
 const DocumentFileList = ({ items, selectedItemIds, handleReorder, handleRemove, handleItemClick }: DocumentFileList) => {
+    
     return (
-        <DragDropContext onDragEnd={handleReorder}>
-            <Droppable droppableId='list-container'>
-            {(provided) => (
-                <div className={items.length ? "DocumentList" : 'DocumentList DocumentList-empty'}
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
+        <div className={items.length ? "DocumentList" : 'DocumentList DocumentList-empty'}>
+            {items.map((item) => (
+                <div 
+                    key={item.id}
+                    onClick={(e: any) => handleItemClick(e, item.id)}
+                    className="dragItemContainer"
                 >
-                    {items.map((item, index) => (
-                        <Draggable key={item.id} draggableId={item.id} index={index}>
-                        {(provided) => (
-                            <div 
-                                ref={provided.innerRef}
-                                {...provided.dragHandleProps}
-                                {...provided.draggableProps}
-                                onClick={(e: any) => handleItemClick(e, item.id)}
-                                className="dragItemContainer"
-                            >
-                                <ListItem
-                                    text={item.file.name}
-                                    onRemove={() => handleRemove(item.id)}
-                                    isSelected={selectedItemIds.some(id => id === item.id)}
-                                />
-                            </div>
-                        )}
-                    </Draggable>
-                    ))}
-                    {provided.placeholder}
+                    <ListItem
+                        fileItem={item}
+                        onRemove={() => handleRemove(item.id)}
+                        isSelected={selectedItemIds.some(id => id === item.id)}
+                    />
                 </div>
-            )}
-            </Droppable>
-        </DragDropContext>
+            ))}
+        </div>
 
     )
 }
