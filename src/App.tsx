@@ -1,4 +1,4 @@
-import Main from './content/Main';
+import Main from './content/Reworked/content/Main';
 import './App.css'
 
 const App = () => {

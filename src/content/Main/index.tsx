@@ -60,7 +60,11 @@ const Main = () => {
         // @ts-ignore
         e.target.files = [];
     }
-
+    
+    const onFileInputClick = () => {
+        fileInputRef.current && fileInputRef.current.click()
+    }
+    
     const toggleSelectedId = (id: string) => {
         if (selectedItemIds.some(value => value === id)) {
             return setSelectedItemIds(selectedItemIds.filter(value => value !== id))
@@ -68,9 +72,6 @@ const Main = () => {
         setSelectedItemIds([...selectedItemIds, id])
     }
 
-    const onFileInputClick = () => {
-        fileInputRef.current && fileInputRef.current.click()
-    }
 
     const handleItemClick = (id: string) => {
         if (selectedItemIds[0] !== id) {
