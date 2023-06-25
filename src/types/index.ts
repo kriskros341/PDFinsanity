@@ -3,9 +3,9 @@ import { v4 as uuid } from 'uuid';
 export class FileItem {
     id: string
     file: File
-    constructor(f: File) {
+    constructor(f: File, id?: string) {
         this.file = f;
-        this.id = uuid();
+        this.id = id ?? uuid();
     }
 
 

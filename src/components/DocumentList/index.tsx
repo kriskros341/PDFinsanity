@@ -1,48 +1,56 @@
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import type { DocumentFileList } from './interface';
-import ListItem from './DocumentListItem';
-import './style.css'
-import { pdfjs } from 'react-pdf';
 import {
     DndContext, 
-    closestCenter,
+    pointerWithin,
     PointerSensor,
     useSensor,
     useSensors,
+    DragOverlay
 } from '@dnd-kit/core';
 import {
-    useSortable,
     arrayMove,
     SortableContext,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {CSS} from '@dnd-kit/utilities';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.js',
-    import.meta.url,
-  ).toString();
+import DocumentListItem from './DocumentListItem';
+import { DocumentListInterface } from './interfaces';
 
-const DocumentFileList = ({ items, selectedItemIds, handleReorder, handleRemove, handleItemClick }: DocumentFileList) => {
+
+const DocumentList = ({ clickEventRouter, itemList, selectedItemIds, setItemList, inspectedItemId }: DocumentListInterface) => {
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
     
-    return (
-        <div className={items.length ? "DocumentList" : 'DocumentList DocumentList-empty'}>
-            {items.map((item) => (
-                <div 
-                    key={item.id}
-                    onClick={(e: any) => handleItemClick(e, item.id)}
-                    className="dragItemContainer"
-                >
-                    <ListItem
-                        fileItem={item}
-                        onRemove={() => handleRemove(item.id)}
-                        isSelected={selectedItemIds.some(id => id === item.id)}
-                    />
-                </div>
-            ))}
-        </div>
+    const handleReorder = (event: any) => {
+        const {active, over} = event;
+        if (active?.id && over?.id && active?.id !== over?.id) {
+            const oldIndex = itemList.map(i => i.id).indexOf(active.id);
+            const newIndex = itemList.map(i => i.id).indexOf(over.id);
+            setItemList(arrayMove(itemList, oldIndex, newIndex));
+        }
+    };
 
+    const isSelected = (itemId: string) => {
+        return selectedItemIds.indexOf(itemId) !== -1;
+    };
+
+    return (
+        <div>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={pointerWithin}
+                onDragEnd={handleReorder}
+            >
+                <SortableContext 
+                    items={itemList}
+                    strategy={verticalListSortingStrategy}
+                >
+                    {itemList.map((item) => (
+                        <DocumentListItem clickEventRouter={clickEventRouter} inspectedItemId={inspectedItemId ?? ''} key={item.id} id={item.id} text={item.file.name} isSelected={isSelected(item.id)} />
+                    ))}
+                <DragOverlay><></></DragOverlay>
+            </SortableContext>
+        </DndContext>
+        </div>
     )
 }
 
-export default DocumentFileList;
+export default DocumentList;

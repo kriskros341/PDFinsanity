@@ -1,79 +1,85 @@
-.MainContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    user-select: none;
-    width: 48rem;
-    padding: 12rem 0 0 0;
+.Panel {
+    box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
-.MainContainer-callToAction {
-    display: inline-block;
-    padding: 1rem 3rem;
-    border: 2px solid white;
+.Panel-content {
+    padding: 2rem;
+}
+
+.Layout-singleCol {
+    margin: 0 auto;
+    display: flex;
+    flex: 0 0 Calc(50% - 4rem / 2);
+}
+
+
+.Layout-doubleCol {
+    margin: 0 auto;
+    display: flex;
+    flex: 0 0 100%;
+    justify-content: space-between;
+}
+
+.Layout-doubleCol .Panel {
+    flex: 0 0 Calc(50% - 2rem);
+}
+
+.Layout-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.MainContainer-callToActionContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.MainContent-callToAction {
+    margin: 0 auto;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 4rem;
     border-radius: 0.5rem;
+    background: #EEE;
+    margin-top: 2rem;
+    box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
     cursor: pointer;
 }
 
-.DragContainer {
-    width: 100%;
+.SidePanel-header {
+    background-color: red;
+}
+
+.MainPanel-actions {
+    display: flex;
+    justify-content: flex-end;
+    height: 100%;
+    
+}
+
+.MainPanel-action {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: #FFF;
+    margin-top: 2rem;
+    box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
+    margin-left: 2rem;
+    cursor: pointer;
+}
+
+.MainPanel-disabledAction {
+    cursor: no-drop;
+    background-color: #EEE;
+    color: #DFDFDF
 }
 
 .App {
-    display: flex;
-    justify-content: center;
-    width: 100vw;
-    min-height: 100vh;
-    
-}
-
-.icon {
-    background-position: center;
-    background-size: cover;
-    width: 3rem;
-    height: 3rem;
-    margin-right: 0.5rem;
-}
-
-.icon-button {
-    display: flex;
-    align-items: center;
-    margin-right: 1rem;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    outline: 2px solid white;
-    cursor: pointer;
-}
-
-.icon-button:first-child {
-    margin-left: 1rem;
-}
-
-.download {
-    background-image: url('../../assets/icons/download.png');
-    filter: invert();
-    
-}
-
-.merge {
-    background-image: url('../../assets/icons/merge.png');
-    filter: invert();
-}
-
-.split {
-    background-image: url('../../assets/icons/split.png');
-    filter: invert();
-
-}
-
-.MainContainer-Toolbar {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    position: sticky;
-    top: 0;
-    background-color: inherit;
-    background-color: #202020;
-    padding: 2rem 1rem;
-    z-index: 100;
+    position: relative;
 }

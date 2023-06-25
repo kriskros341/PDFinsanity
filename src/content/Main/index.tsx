@@ -1,81 +1,102 @@
-import { useState, DragEvent, useRef, useEffect } from 'react'
-import { PDFDocument } from 'pdf-lib';
-import PDFMerger from 'pdf-merger-js/browser';
-import DocumentFileList from '../../components/DocumentList';
-import { v4 as uuid } from 'uuid';
+import { DragEvent, useRef, useState } from 'react';
 
-import {  } from 'react-beautiful-dnd'
-
-import { FileItem } from '../../types'
-
-import './style.css';
+import './style.css'
+import { FileItem } from '../../types';
 import EmptyDocumentList from '../../components/EmptyDocumentList';
-import DraggingIndicator from '../../components/DraggingIndicator';
+import DocumentList from '../../components/DocumentList';
+import DocumentManager from '../../components/DocumentPageList';
+import { PDFDocument } from 'pdf-lib';
 
-const download = (data: Blob, filename: string) => {
-    let file = new File([data], filename, {type: "application/pdf"});
-    const fileUrl = URL.createObjectURL(file);
-    const anchor = document.createElement('a');
-    anchor.href = fileUrl;
-    anchor.download = filename;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    URL.revokeObjectURL(fileUrl);
-};
+import { createDocumentFromDocumentIndices, download, merge } from './documentHelpers';
+import RenameModal from '../../components/Modals/Rename';
 
-const split = (file: File) => {
-    return new Promise<File[]>(async (resolve) => {
-        const result = []
-        const docData = await file.arrayBuffer();
-        const document = await PDFDocument.load(docData);
-        const indices = document.getPageIndices();
-        for (let indice of indices) {
-            const pageDocument = await PDFDocument.create()
-            const [page,] = await pageDocument.copyPages(document, [indice])
-            pageDocument.addPage(page)
-            const docData = await pageDocument.save();
-            result.push(new File([docData], indices.length === 1 ? file.name : `${file.name}_page_${indice+1}`));
-        }
-        resolve(result)
-    })
+type layoutType = keyof typeof layoutType
+
+const Panel = ({children, onClick}: {children: React.ReactNode, onClick?: (e: any) => void}) => {
+    return (
+        <div className="Panel" onClick={onClick}>
+            {children}
+        </div>
+    )
 }
 
-const createFileItemFromFile = async (file: File) => {
-    return { id: uuid(), file }
+const layoutType = {
+    single: 'single',
+    double: 'double',
+} as const
+
+const Layout = ({layout, children}: {layout: layoutType, children: React.ReactNode}) => {
+    return (
+        <div className="Layout-container">
+            <div className={layout === 'single' ? "Layout-singleCol" : "Layout-doubleCol" }>
+                {children}
+            </div>
+        </div>
+    )
 }
+
+// const Modal = ({anchor}: {anchor: React.MutableRefObject<HTMLElement>}) => {
+//     const styles = { left: anchor.current?.offsetLeft ?? 0, top: anchor.current?.offsetTop ?? 0 }
+//     const [ position, setPosition ] = useState<{x: number, y: number}>({ x: 0, y: 0 })
+//     useEffect(() => {
+//         setPosition({
+//             x: (anchor.current?.offsetLeft ?? 0) - 20,
+//             y: (anchor.current?.offsetTop ?? 0) - 20,
+//         })
+//     }, [anchor.current])
+//     return (
+//         <div style={styles} className="modal">
+//             jdff
+//         </div>
+//     )
+// }
 
 const Main = () => {
-    const [items, setItems] = useState<FileItem[]>([]);
-    const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
-    const [ dragCounter, setDragCounter ] = useState(0)
-
+    const [ fileItems, setFileItems ] = useState<FileItem[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [ inspectedItemId, setInspectedItemId ] = useState<string | undefined>();
+    const [renameModalState, setRenameModalState] = useState<any>();
+
+    const [ selectedItemIds, setSelectedItemIds ] = useState<string[]>([]);
+
+    const handleDrop = (e: DragEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        e.nativeEvent.preventDefault();
+        e.stopPropagation();
+        const { files } = e.dataTransfer;
+        if (files.length > 0) {
+            setFileItems([...fileItems, ...[...files].map(FileItem.fromFile)]);
+        }
+    }
+
+    const onFileInputClick = (e: any) => {
+        e.stopPropagation();
+        fileInputRef.current && fileInputRef.current.click();
+    }
 
     const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault()
+        e.preventDefault();
         if (e.target) {
-            setItems([...items, ...[...e.target.files!].map(FileItem.fromFile)]);
+            setFileItems([...fileItems, ...[...e.target.files!].map(FileItem.fromFile)]);
         }
         // @ts-ignore
         e.target.files = [];
     }
-    
-    const onFileInputClick = () => {
-        fileInputRef.current && fileInputRef.current.click()
-    }
-    
-    const toggleSelectedId = (id: string) => {
-        if (selectedItemIds.some(value => value === id)) {
-            return setSelectedItemIds(selectedItemIds.filter(value => value !== id))
-        }
-        setSelectedItemIds([...selectedItemIds, id])
+
+    const toggleInspectedItem = (id: string) => {
+        setInspectedItemId(current => current === id ? undefined : id);
     }
 
+    const toggleSelectedId = (id: string) => {
+        if (selectedItemIds.some(value => value === id)) {
+            return setSelectedItemIds(selectedItemIds.filter(value => value !== id));
+        }
+        setSelectedItemIds([...selectedItemIds, id]);
+    }
 
     const handleItemClick = (id: string) => {
         if (selectedItemIds[0] !== id) {
-            setSelectedItemIds([id])
+            setSelectedItemIds([id]);
         }
     }
 
@@ -84,156 +105,192 @@ const Main = () => {
     }
 
     const handleItemShiftClick = (id: string) => {
-        let startIdx = items.findIndex(item => item.id === id);
+        let startIdx = fileItems.findIndex(item => item.id === id);
         // @TODO: have last selected item in separate state
-        let endIdx = items.findIndex(item => item.id === selectedItemIds[selectedItemIds.length - 1]);  
+        let endIdx = fileItems.findIndex(item => item.id === selectedItemIds[selectedItemIds.length - 1]);  
         if(startIdx > endIdx) {
-            [startIdx, endIdx] = [endIdx, startIdx] 
+            [startIdx, endIdx] = [endIdx, startIdx];
         }
-        const affectedIds = items.slice(startIdx, endIdx+1).map(item => item.id);
-        const clearedSelection = selectedItemIds.filter(value => affectedIds.some(id => value !== id))
-        setSelectedItemIds([...clearedSelection, ...affectedIds])
+        const affectedIds = fileItems.slice(startIdx, endIdx+1).map(item => item.id);
+        const clearedSelection = selectedItemIds.filter(value => affectedIds.some(id => value !== id));
+        setSelectedItemIds([...clearedSelection, ...affectedIds]);
     }
 
-    const clickEventRouter = (e: any, id: string) => {
+    const clickEventRouter = (e: any, id: string, dbl?: boolean) => {
         e.preventDefault();
         e.stopPropagation();
+        if (dbl) {
+            return toggleInspectedItem(id);
+        }
         if (e.ctrlKey) {
-            return hanldeItemCtrlClick(id)
+            return hanldeItemCtrlClick(id);
         }
         if(e.shiftKey) {
-            return handleItemShiftClick(id)
+            return handleItemShiftClick(id);
         }
-        handleItemClick(id)
+        handleItemClick(id);
     }
 
-    const handleDrop = (e: DragEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const { files } = e.dataTransfer;
-        if (files.length > 0) {
-            setItems([...items, ...[...files].map(FileItem.fromFile)]);
-        }
-        setDragCounter(0)
-    }
-
-    const onDragOver = (e: DragEvent<HTMLFormElement>) => {
-        e.preventDefault()
-    }
-    
-    const onDragEnter = (e: DragEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setDragCounter(current => current+1)
-    }
-
-    const handleRemove = (id: string) => {
-        setItems(files => files.filter(file => file.id != id));
-    }
-
-    const handleReorder = (updatedFile: any) => {
-        if (!updatedFile.destination) return;
-        var updatedList = [...items];
-        const [reorderedItem] = updatedList.splice(updatedFile.source.index, 1);
-        updatedList.splice(updatedFile.destination.index, 0, reorderedItem);
-        setItems(updatedList);
-    };
-
-    const onMerge = async () => {
-        const idsToMerge = selectedItemIds.length === 0 ? items.map(item => item.id) : selectedItemIds
-        const result: FileItem[] = [];
-        const merger = new PDFMerger();
-        for (let item of items) {
-            console.log(idsToMerge, items)
-            if (idsToMerge.find(value => value === item.id)) {
-                await merger.add(item.file)
-            } else {
-                result.push(item)
-            }
-        }
-        const mergedPdf = await merger.saveAsBuffer()
-        let file = new File([mergedPdf], "merged documents", {type: "application/pdf"});
-        const newDocument = await createFileItemFromFile(file)
-        result.push(newDocument)
-        setItems(result);
-        setSelectedItemIds([newDocument.id]);
-    }
-
-    const onDownload = () => {
-        const itemsToDownload = selectedItemIds.length === 0 ? items : items.filter(item => selectedItemIds.find(value => value === item.id))
-        itemsToDownload.forEach(f => {
-            download(f.file, f.file.name)
-        })
-    }
-
-    const onSplit = async () => {
-        const idsToSplit = selectedItemIds.length === 0 ? items.map(item => item.id) : selectedItemIds
-        const result: FileItem[] = [];
-        for (let item of items) {
-            console.log(idsToSplit, items)
-            if (idsToSplit.find(value => value === item.id)) {
-                const newDocuments = await split(item.file);
-                console.log('jd')
-                for (const newDocument of newDocuments) {
-                    result.push(await createFileItemFromFile(newDocument))
-                }
-            } else {
-                result.push(item)
-            }
-        }
-        setItems(result);
-        setSelectedItemIds(result.map(item => item.id));
-    }
-
-    const onDragLeave = (e: any) => {
-        e.stopPropagation()
-        console.log('dragLeave')
-        setDragCounter(current => current-1)
-    }
-
-    const onClickOut = (e: any) => {
+    const onClickOutside = (e: any) => {
         e?.stopPropagation();
+        setInspectedItemId(undefined);
         setSelectedItemIds([]);
     }
 
+    const handleCommit = (newPageIndices: number[]) => {
+        if(!newPageIndices.length) {
+            setSelectedItemIds(selectedItemIds.filter(item => item !== inspectedItemId));
+            setFileItems(fileItems.filter(item => item.id !== inspectedItemId));
+            setInspectedItemId(undefined);
+            return;
+        }
+        const asyncHelper = async () => {
+            const oldDocumentFileItem = fileItems.find(fileItem => fileItem.id === inspectedItemId);
+            if (!oldDocumentFileItem) {
+                console.warn('No reorder target file provided');
+                return;
+            }
+            const newDocumentFile = await createDocumentFromDocumentIndices(oldDocumentFileItem.file, newPageIndices);
+            const newDocumentFileItem = FileItem.fromFile(newDocumentFile);
+            setSelectedItemIds(selectedItemIds.map(id => id === oldDocumentFileItem.id ? newDocumentFileItem.id : id));
+            setInspectedItemId(newDocumentFileItem.id);
+            setFileItems(fileItems.map(item => item.id === oldDocumentFileItem.id ? newDocumentFileItem : item));
+        }
+        asyncHelper();
+    }
+
+    const onDownload = (e: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const documentsToDownload = fileItems.filter(fileItem => selectedItemIds.includes(fileItem.id));
+        for (const document of documentsToDownload) {
+            download(document.file, document.file.name);
+        }
+    }
+
+    const onMergeConfirm = async (e: any, newName: string) => {
+        const newDocument = await merge(fileItems, selectedItemIds, newName);
+        console.log(newDocument.file.name);
+        let result = fileItems.filter(item => selectedItemIds.indexOf(item.id) === -1);
+        result.push(newDocument);
+        setFileItems(result);
+        setSelectedItemIds([newDocument.id]);
+    }
+ 
+    const onMerge = (e: any) => {
+        e.stopPropagation();
+        e.preventDefault();
+        setRenameModalState({
+            oldName: '',
+            onConfirm: onMergeConfirm,
+            text: `Name new document`
+        });
+    }
+
+    const onDelete = (e: any) => {
+        e.stopPropagation();
+        setFileItems(fileItems.filter((fileItem) => selectedItemIds.indexOf(fileItem.id) === -1));
+    }
+
+    const onRenameConfirm = (e: any, newName: string) => {
+        e.stopPropagation();
+        setRenameModalState(undefined);
+        const currentFileItemIndex = fileItems.findIndex(fileItem => fileItem.id === inspectedItemId);
+        if (currentFileItemIndex === -1) {
+            return;
+        }
+        const currentFileItem = fileItems[currentFileItemIndex];
+        const newFile = new File([currentFileItem.file], `${newName}.png`, { type: currentFileItem.file.type });
+        const newFileItem = new FileItem(newFile, currentFileItem.id);
+        setFileItems(fileItems.map(fileItem => fileItem.id === inspectedItemId ? newFileItem : fileItem));
+    }
+
+    const onRename = (e: any) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const document = fileItems.find(item => item.id === inspectedItemId);
+        setRenameModalState({
+            oldName: document?.file.name.slice(0, -4) ?? '',
+            onConfirm: onRenameConfirm,
+            text: `Rename ${document?.file.name}`
+        });
+    }
+
+    const onExtractConfirmed = async (indices: number[], newName: string) => {
+        const documentFileItem = fileItems.find(item => item.id === inspectedItemId);
+        if (!documentFileItem) {
+            return;
+        }
+        const newDocumentFile = await createDocumentFromDocumentIndices(documentFileItem.file, indices);
+        const newFile = new File([newDocumentFile], `${newName}.png`, { type: documentFileItem.file.type });
+        const newFileItem = FileItem.fromFile(newFile);
+        setFileItems([...fileItems, newFileItem]);
+    }
+
+    const onPagesExtract = (indices: number[]) => {
+        setRenameModalState({
+            oldName: '',
+            onConfirm: (_: any, newName: string) => onExtractConfirmed(indices, newName),
+            text: `Extract as`
+        });
+    }
+
+    let ActionButtonClassName = "MainPanel-action";
+    if (!selectedItemIds.length) {
+        ActionButtonClassName += " MainPanel-disabledAction";
+    }
+
+    let MergeActionButtonClassName = "MainPanel-action";
+    if (selectedItemIds.length < 2) {
+        MergeActionButtonClassName += " MainPanel-disabledAction";
+    }
+
+    let RenameActionButtonClassName = "MainPanel-action";
+    if (!inspectedItemId) {
+        RenameActionButtonClassName += " MainPanel-disabledAction";
+    }
+
     return (
-        <form onDrop={handleDrop} onDragOver={onDragOver} onDragEnter={onDragEnter} onDragLeave={onDragLeave} onSubmit={(e) => e.preventDefault()}>
-            {dragCounter !== 0 && <DraggingIndicator />}
-            <div className="App" onClick={onClickOut}>
-                {(items.length === 0) ? (
-                    <EmptyDocumentList onClick={onFileInputClick}/>
-                ) : (
-                    <div className="MainContainer">
-                        <div className="MainContainer-Toolbar">
-                            <div className="icon-button" onClick={onMerge}>
-                                <div className="icon merge" />
-                                <div>Merge</div>
-                            </div>
-                            <div className="icon-button" onClick={onDownload}>
-                                <div className="icon download" />
-                                <div>{selectedItemIds.length === 0 ? 'Download all' : 'Download selected'}</div>
-                            </div>
-                            <div className="icon-button" onClick={onSplit}>
-                                <div className="icon split" />
-                                <div>{selectedItemIds.length === 0 ? 'Split all' : 'Split selected'}</div>
-                            </div>
-                        </div>
-                        <div className="DragContainer">
-                            <DocumentFileList
-                                items={items}
-                                selectedItemIds={selectedItemIds}
-                                handleItemClick={clickEventRouter}
-                                handleRemove={handleRemove}
-                                handleReorder={handleReorder}
-                            />
-                        </div>
-                        <div onClick={onFileInputClick} className="MainContainer-callToAction">
-                            <h4>Drag over or Click here to add files</h4>
-                        </div>
-                    </div>
-                )}
+        <>
+            {renameModalState && (
+                <RenameModal {...renameModalState} onHide={() => setRenameModalState(undefined)} />
+            )}
+            <form className="App" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop} onSubmit={(e) => e.preventDefault()}>
+                {
+                    fileItems.length ? (
+                        <Layout layout={inspectedItemId ? layoutType.double : layoutType.single}>
+                            <Panel onClick={onClickOutside}>
+                                <div className="Panel-content">
+                                    <div className="MainPanel-header">
+                                        <div className="MainPanel-actions">
+                                            <div onClick={onRename} className={RenameActionButtonClassName}>Rename</div>
+                                            <div onClick={onDelete} className={ActionButtonClassName}>Delete</div>
+                                            <div onClick={onDownload} className={ActionButtonClassName}>Download</div>
+                                            <div onClick={onMerge} className={MergeActionButtonClassName}>Merge</div>
+                                        </div>
+                                    </div>
+                                    <DocumentList clickEventRouter={clickEventRouter} itemList={fileItems} selectedItemIds={selectedItemIds} setItemList={(value) => setFileItems(value)} inspectedItemId={inspectedItemId} />
+                                </div>
+                                <div className="MainContainer-callToActionContainer">
+                                    <div className="MainContent-callToAction" onClick={onFileInputClick}>
+                                        <h3>Drag or click to add more files</h3>
+                                    </div>
+                                </div>
+                            </Panel>
+                            {inspectedItemId && (
+                                <Panel>
+                                    <DocumentManager handleExtract={onPagesExtract} handleCommit={handleCommit} fileItem={fileItems.find(item => item.id === inspectedItemId)} />
+                                </Panel>
+                            )}
+                        </Layout>
+                    ) : (
+                        <EmptyDocumentList onClick={onFileInputClick} />
+                        )
+                    }
                 <input multiple style={{display: 'none'}} type="file" ref={fileInputRef} onChange={onFileInputChange} />
-            </div>
-        </form>
-    )
+            </form>
+        </>
+    );
 }
 
-export default Main;
+export default Main

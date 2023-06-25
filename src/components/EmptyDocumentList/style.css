@@ -1,26 +1,19 @@
 .EmptyDocumentList-container {
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    padding: 4rem 0;
 }
 
 .EmptyDocumentList {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-
-}
-
-.EmptyDocumentList-text {
-    padding: 4rem;
+    text-align: center;
 }
 
 .EmptyDocumentList-callToAction {
-    padding: 4rem 12rem;
-    box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
+    padding: 2rem 4rem;
     border-radius: 0.5rem;
+    background: #FFF;
+    margin-top: 2rem;
+    box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
     cursor: pointer;
 }

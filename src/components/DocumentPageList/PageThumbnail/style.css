@@ -1,0 +1,7 @@
+.PageThumbnail-container {
+    display: inline-flex;
+}
+
+.PageThumbnail-selected {
+    outline: 2px solid green;
+}

@@ -1,0 +1,8 @@
+.RenameModal-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.RenameModal-title {
+    margin-bottom: 1rem;
+}

@@ -7,7 +7,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 import './style.css';
 
-const PageThumbnail = ({id, pageNumber, isSelected, onClick}: {id: string, pageNumber: number, isSelected: boolean, onClick: () => void}) => {
+const PageThumbnail = ({id, pageNumber, isSelected, onClick}: {id: string, pageNumber: number, isSelected: boolean, onClick: (e: any) => void}) => {
     const {
         attributes,
         listeners,
@@ -19,13 +19,17 @@ const PageThumbnail = ({id, pageNumber, isSelected, onClick}: {id: string, pageN
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        outline: isSelected ? '2px solid green' : undefined,
     };
 
     const handleClick = (e: any) => {
         e.stopPropagation();
         e.preventDefault();
-        onClick()
+        onClick(e);
+    };
+
+    let thumbnailClassName = "PageThumbnail";
+    if (isSelected) {
+        thumbnailClassName += " PageThumbnail-selected";
     }
 
     return (
@@ -33,10 +37,10 @@ const PageThumbnail = ({id, pageNumber, isSelected, onClick}: {id: string, pageN
             style={style}
             {...attributes}
             {...listeners}
-            className="PageThumbnail"
+            className="PageThumbnail-container"
             onClick={handleClick}
         >
-            <Thumbnail width={212} height={300} className="thumbnail" pageNumber={pageNumber} />
+            <Thumbnail height={300} className={thumbnailClassName} pageNumber={pageNumber} />
         </div>
     )
 }

@@ -1,6 +1,6 @@
 import './style.css'
 
-const EmptyDocumentList = ({onClick}: {onClick: () => void}) => {
+const EmptyDocumentList = ({onClick}: {onClick: (e: any) => void}) => {
     return (
         <div className="EmptyDocumentList-container">
             <div className="EmptyDocumentList">
@@ -10,7 +10,6 @@ const EmptyDocumentList = ({onClick}: {onClick: () => void}) => {
                 <div onClick={onClick} className="EmptyDocumentList-callToAction">
                     <h3>Drag over or click here to add files</h3>
                 </div>
-
             </div>
         </div>
     )

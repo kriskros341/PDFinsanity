@@ -1,0 +1,32 @@
+.PageList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 1rem;
+}
+
+.DocumentManager-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+}
+
+.DocumentManager-action {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: #FFF;
+    margin-top: 2rem;
+    box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
+    margin-left: 2rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.DocumentManager-disabledAction {
+    cursor: no-drop;
+    background-color: #EEE;
+    color: #DFDFDF
+}
+
+.DocumentManager {
+    padding: 2rem;
+}
