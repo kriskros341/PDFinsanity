@@ -5,7 +5,6 @@ import { FileItem } from '../../types';
 import EmptyDocumentList from '../../components/EmptyDocumentList';
 import DocumentList from '../../components/DocumentList';
 import DocumentManager from '../../components/DocumentPageList';
-import { PDFDocument } from 'pdf-lib';
 
 import { createDocumentFromDocumentIndices, download, merge } from './documentHelpers';
 import RenameModal from '../../components/Modals/Rename';
@@ -169,6 +168,7 @@ const Main = () => {
     }
 
     const onMergeConfirm = async (e: any, newName: string) => {
+        e.stopPropagation();
         const newDocument = await merge(fileItems, selectedItemIds, newName);
         console.log(newDocument.file.name);
         let result = fileItems.filter(item => selectedItemIds.indexOf(item.id) === -1);
