@@ -174,6 +174,7 @@ const Main = () => {
         let result = fileItems.filter(item => selectedItemIds.indexOf(item.id) === -1);
         result.push(newDocument);
         setFileItems(result);
+        setInspectedItemId(newDocument.id);
         setSelectedItemIds([newDocument.id]);
     }
  
