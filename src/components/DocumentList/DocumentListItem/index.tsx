@@ -40,7 +40,7 @@ const DocumentListItem = ({
       onDoubleClick={handleDoubleClick}
       className="DocumentListItem"
     >
-      {text.slice(0, -4)}
+      {text.slice(0, text.lastIndexOf('.'))}
     </div>
   );
 };

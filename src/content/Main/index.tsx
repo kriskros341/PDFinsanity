@@ -63,13 +63,9 @@ const Main = () => {
 
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
 
-  const handleDrop = async (e: DragEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.nativeEvent.preventDefault();
-    e.stopPropagation();
-    const { files } = e.dataTransfer;
-    const newFileItems = [...fileItems];
-    for (let file of files ?? []) {
+  const addFileItemsFromFileList = async (fileList: FileList) => {
+    const newFileItems = [...fileItems]
+    for (let file of fileList) {
       if (file.name.endsWith("pdf")) {
         newFileItems.push(FileItem.fromFile(file));
       } else {
@@ -80,9 +76,13 @@ const Main = () => {
       }
     }
 
-    if (files.length > 0) {
-      setFileItems(newFileItems);
-    }
+    setFileItems(newFileItems);
+  }
+  const handleDrop = async (e: DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    e.nativeEvent.preventDefault();
+    e.stopPropagation();
+    addFileItemsFromFileList(e.dataTransfer.files);
   };
 
   const onFileInputClick = (e: any) => {
@@ -92,22 +92,11 @@ const Main = () => {
 
   const onFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const newFileItems = [...fileItems];
-    for (let file of e.target?.files ?? []) {
-      if (file.name.endsWith("pdf")) {
-        newFileItems.push(FileItem.fromFile(file));
-      } else {
-        const blob = new Blob([await imageToPdf(file)], {
-          type: "application/pdf",
-        });
-        newFileItems.push(FileItem.fromFile(new File([blob], file.name)));
-      }
+    if (!e.target.files) {
+      return;
     }
-    if (e.target) {
-      setFileItems(newFileItems);
-    }
-    // @ts-ignore
-    e.target.files = [];
+    addFileItemsFromFileList(e.target.files);
+    e.target.files = null;
   };
 
   const toggleInspectedItem = (id: string) => {
@@ -216,7 +205,7 @@ const Main = () => {
       selectedItemIds.includes(fileItem.id),
     );
     for (const document of documentsToDownload) {
-      download(document.file, document.file.name + ".pdf");
+      download(document.file, document.file.name.slice(0, document.file.name.lastIndexOf('.')) + ".pdf");
     }
   };
 
@@ -278,7 +267,7 @@ const Main = () => {
     e.preventDefault();
     const document = fileItems.find((item) => item.id === inspectedItemId);
     setRenameModalState({
-      oldName: document?.file.name.slice(0, -4) ?? "",
+      oldName: document?.file.name.slice(0, document?.file.name.lastIndexOf('.')) ?? "",
       onConfirm: onRenameConfirm,
       text: `Rename ${document?.file.name}`,
     });
