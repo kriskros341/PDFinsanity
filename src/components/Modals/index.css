@@ -1,43 +1,43 @@
 .Modal-container {
-    height: 100vh;
-    width: 100vw;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    position: absolute;
-    z-index: 100;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  z-index: 100;
 }
 
 .Modal-actions {
-    display: flex;
-    justify-content: flex-end;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .Modal-action {
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    background: #FFF;
-    margin-top: 2rem;
-    box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
-    cursor: pointer;
-    margin-left: 2rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: #fff;
+  margin-top: 2rem;
+  box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  margin-left: 2rem;
 }
 
 .Modal-cation:first-child {
-    margin-left: 0rem;
+  margin-left: 0rem;
 }
 
 .Modal-disabledAction {
-    cursor: no-drop;
-    background-color: #EEE;
-    color: #DFDFDF
+  cursor: no-drop;
+  background-color: #eee;
+  color: #dfdfdf;
 }
 
 .Modal {
-    padding: 2rem 4rem;
-    border-radius: 0.5rem;
-    background: #EEE;
-    margin-top: 2rem;
-    box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
+  padding: 2rem 4rem;
+  border-radius: 0.5rem;
+  background: #eee;
+  margin-top: 2rem;
+  box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
 }
