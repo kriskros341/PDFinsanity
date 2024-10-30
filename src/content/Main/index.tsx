@@ -82,7 +82,7 @@ const Main = () => {
     e.preventDefault();
     e.nativeEvent.preventDefault();
     e.stopPropagation();
-    addFileItemsFromFileList(e.dataTransfer.files);
+    await addFileItemsFromFileList(e.dataTransfer.files);
   };
 
   const onFileInputClick = (e: any) => {
@@ -95,7 +95,7 @@ const Main = () => {
     if (!e.target.files) {
       return;
     }
-    addFileItemsFromFileList(e.target.files);
+    await addFileItemsFromFileList(e.target.files);
     e.target.files = null;
   };
 
