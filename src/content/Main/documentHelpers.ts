@@ -3,7 +3,7 @@ import { FileItem } from "../../types";
 import PDFMerger from "pdf-merger-js";
 
 export const download = (data: Blob, filename: string) => {
-  let file = new File([data], filename, { type: "application/pdf" });
+  const file = new File([data], filename, { type: "application/pdf" });
   const fileUrl = URL.createObjectURL(file);
   const anchor = document.createElement("a");
   anchor.href = fileUrl;
@@ -20,7 +20,7 @@ export const split = async (file: File) => {
   const docData = await file.arrayBuffer();
   const document = await PDFDocument.load(docData);
   const indices = document.getPageIndices();
-  for (let indice of indices) {
+  for (const indice of indices) {
     const pageDocument = await PDFDocument.create();
     const [page] = await pageDocument.copyPages(document, [indice]);
     pageDocument.addPage(page);
@@ -42,15 +42,15 @@ export const merge = async (
   newName?: string,
 ) => {
   const merger = new PDFMerger();
-  for (let item of files) {
+  for (const item of files) {
     if (mergeIds.indexOf(item.id) !== -1) {
       await merger.add(item.file as any);
     }
   }
   const mergedPdf = await merger.saveAsBuffer();
-  let mergedPdfFile = new File(
+  const mergedPdfFile = new File(
     [mergedPdf],
-    `${newName}.pdf` ?? defaultMergeName,
+    newName ? `${newName}.pdf` : defaultMergeName,
     { type: "application/pdf" },
   );
   const newDocument = FileItem.fromFile(mergedPdfFile);

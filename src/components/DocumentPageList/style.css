@@ -1,9 +1,3 @@
-.PageList {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  row-gap: 1rem;
-}
-
 .DocumentManager-actions {
   display: flex;
   justify-content: flex-end;
@@ -27,6 +21,3 @@
   color: #dfdfdf;
 }
 
-.DocumentManager {
-  padding: 2rem;
-}

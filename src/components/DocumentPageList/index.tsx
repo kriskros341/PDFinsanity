@@ -22,6 +22,7 @@ import PageThumbnail from "./PageThumbnail";
 import type { FileItem } from "../../types";
 
 import "./style.css";
+import clsx from "clsx";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -54,7 +55,7 @@ const DocumentPageList = ({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
   return (
-    <div className="PageList">
+    <div className="flex gap-4 px-4 flex-wrap">
       <DndContext
         sensors={sensors}
         collisionDetection={pointerWithin}
@@ -195,7 +196,7 @@ const DocumentManager = ({
 
   const onDiscardChanges = () => {
     const result = [];
-    for (let indice of new Array(documentPageCount).fill(0).keys()) {
+    for (const indice of new Array(documentPageCount).fill(0).keys()) {
       result.push({ id: uuid(), indice });
     }
     setIndices(result);
@@ -227,51 +228,58 @@ const DocumentManager = ({
     );
   };
 
-  let ActionButtonClassName = "DocumentManager-action";
-  if (!selectedIndiceIds.length) {
-    ActionButtonClassName += " DocumentManager-disabledAction";
-  }
-
-  let DocumentActionButtonClassName = "DocumentManager-action";
-  if (!getIsDocumentAltered()) {
-    DocumentActionButtonClassName += " DocumentManager-disabledAction";
-  }
-
   return (
-    <div onClick={onClickOutside} className="DocumentManager">
-      <div className="DocumentManager-actions">
+    <div onClick={onClickOutside}>
+      <div className="flex flex-wrap gap-4 px-4">
         <div
-          className={DocumentActionButtonClassName}
+          className={clsx("px-4 py-2 rounded-sm bg-[#ddd] cursor-pointer btn-shadow", !getIsDocumentAltered() && "text-gray-400 cursor-no-drop")}
           onClick={onDiscardChanges}
         >
           Discard
         </div>
-        <div className={DocumentActionButtonClassName} onClick={onSaveChanges}>
+        <div
+          className={clsx("px-4 py-2 rounded-sm bg-[#ddd] cursor-pointer btn-shadow", !getIsDocumentAltered() && "text-gray-400 cursor-no-drop")}
+          onClick={onSaveChanges}
+          >
           Save
         </div>
-        <div className={ActionButtonClassName} onClick={onExtract}>
+        <div
+          className={clsx("px-4 py-2 rounded-sm bg-[#ddd] cursor-pointer btn-shadow", !selectedIndiceIds.length && "text-gray-400 cursor-no-drop")}
+          onClick={onExtract}
+        >
           Extract as
         </div>
-        <div className={ActionButtonClassName} onClick={onDelete}>
+        <div
+          className={clsx("px-4 py-2 rounded-sm bg-[#ddd] cursor-pointer btn-shadow", !selectedIndiceIds.length && "text-gray-400 cursor-no-drop")}
+          onClick={onDelete}
+        >
           Delete
         </div>
-        <div className={ActionButtonClassName} onClick={onClone}>
+        <div
+          className={clsx("px-4 py-2 rounded-sm bg-[#ddd] cursor-pointer btn-shadow", !selectedIndiceIds.length && "text-gray-400 cursor-no-drop")}
+          onClick={onClone}
+        >
           Clone
         </div>
       </div>
-      <Document
-        loading={PageThumbnailOverlay}
-        className="thumbnailContainer"
-        file={fileItem!.file}
-        onItemClick={() => {}}
-      >
-        <DocumentPageList
-          onPageClick={clickEventRouter}
-          documentIndices={indices}
-          handleReorder={handleReorder}
-          isIndiceSelected={isIndiceSelected}
-        />
-      </Document>
+      <div className="p-4">
+        <fieldset className="border border-solid border-gray-300 p-2">
+          <legend className="text-sm">{fileItem?.file.name}</legend>
+          <Document
+            loading={PageThumbnailOverlay}
+            className="py-4"
+            file={fileItem?.file}
+          >
+            <DocumentPageList
+              onPageClick={clickEventRouter}
+              documentIndices={indices}
+              handleReorder={handleReorder}
+              isIndiceSelected={isIndiceSelected}
+            />
+          </Document>
+        </fieldset>
+      </div>
+
     </div>
   );
 };

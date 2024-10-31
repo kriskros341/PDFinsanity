@@ -1,8 +1,5 @@
-.Panel {
+.panel-shadow {
   box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.25);
-  width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 .Panel-content {
@@ -48,8 +45,8 @@
   border-radius: 0.5rem;
   background: #eee;
   margin-top: 2rem;
-  box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
   cursor: pointer;
+  box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
 }
 
 .SidePanel-header {
@@ -62,22 +59,12 @@
   height: 100%;
 }
 
-.MainPanel-action {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  background: #fff;
-  margin-top: 2rem;
+.btn-shadow {
   box-shadow: 0px 3px 4px 3px rgba(0, 0, 0, 0.25);
-  margin-left: 2rem;
-  cursor: pointer;
 }
 
 .MainPanel-disabledAction {
   cursor: no-drop;
   background-color: #eee;
   color: #dfdfdf;
-}
-
-.App {
-  position: relative;
 }

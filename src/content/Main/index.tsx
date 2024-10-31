@@ -2,7 +2,6 @@ import { DragEvent, useRef, useState } from "react";
 
 import "./style.css";
 import { FileItem } from "../../types";
-import EmptyDocumentList from "../../components/EmptyDocumentList";
 import DocumentList from "../../components/DocumentList";
 import DocumentManager from "../../components/DocumentPageList";
 
@@ -13,47 +12,7 @@ import {
   merge,
 } from "./documentHelpers";
 import RenameModal from "../../components/Modals/Rename";
-
-type layoutType = keyof typeof layoutType;
-
-const Panel = ({
-  children,
-  onClick,
-}: {
-  children: React.ReactNode;
-  onClick?: (e: any) => void;
-}) => {
-  return (
-    <div className="Panel" onClick={onClick}>
-      {children}
-    </div>
-  );
-};
-
-const layoutType = {
-  single: "single",
-  double: "double",
-} as const;
-
-const Layout = ({
-  layout,
-  children,
-}: {
-  layout: layoutType;
-  children: React.ReactNode;
-}) => {
-  return (
-    <div className="Layout-container">
-      <div
-        className={
-          layout === "single" ? "Layout-singleCol" : "Layout-doubleCol"
-        }
-      >
-        {children}
-      </div>
-    </div>
-  );
-};
+import clsx from "clsx";
 
 const Main = () => {
   const [fileItems, setFileItems] = useState<FileItem[]>([]);
@@ -64,8 +23,8 @@ const Main = () => {
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
 
   const addFileItemsFromFileList = async (fileList: FileList) => {
-    const newFileItems = [...fileItems]
-    for (let file of fileList) {
+    const newFileItems = [...fileItems];
+    for (const file of fileList) {
       if (file.name.endsWith("pdf")) {
         newFileItems.push(FileItem.fromFile(file));
       } else {
@@ -77,7 +36,7 @@ const Main = () => {
     }
 
     setFileItems(newFileItems);
-  }
+  };
   const handleDrop = async (e: DragEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.nativeEvent.preventDefault();
@@ -106,7 +65,7 @@ const Main = () => {
   const toggleSelectedId = (id: string) => {
     if (selectedItemIds.some((value) => value === id)) {
       return setSelectedItemIds(
-        selectedItemIds.filter((value) => value !== id),
+        selectedItemIds.filter((value) => value !== id)
       );
     }
     setSelectedItemIds([...selectedItemIds, id]);
@@ -126,7 +85,7 @@ const Main = () => {
     let startIdx = fileItems.findIndex((item) => item.id === id);
     // @TODO: have last selected item in separate state
     let endIdx = fileItems.findIndex(
-      (item) => item.id === selectedItemIds[selectedItemIds.length - 1],
+      (item) => item.id === selectedItemIds[selectedItemIds.length - 1]
     );
     if (startIdx > endIdx) {
       [startIdx, endIdx] = [endIdx, startIdx];
@@ -135,7 +94,7 @@ const Main = () => {
       .slice(startIdx, endIdx + 1)
       .map((item) => item.id);
     const clearedSelection = selectedItemIds.filter((value) =>
-      affectedIds.some((id) => value !== id),
+      affectedIds.some((id) => value !== id)
     );
     setSelectedItemIds([...clearedSelection, ...affectedIds]);
   };
@@ -164,7 +123,7 @@ const Main = () => {
   const handleCommit = (newPageIndices: number[]) => {
     if (!newPageIndices.length) {
       setSelectedItemIds(
-        selectedItemIds.filter((item) => item !== inspectedItemId),
+        selectedItemIds.filter((item) => item !== inspectedItemId)
       );
       setFileItems(fileItems.filter((item) => item.id !== inspectedItemId));
       setInspectedItemId(undefined);
@@ -172,7 +131,7 @@ const Main = () => {
     }
     const asyncHelper = async () => {
       const oldDocumentFileItem = fileItems.find(
-        (fileItem) => fileItem.id === inspectedItemId,
+        (fileItem) => fileItem.id === inspectedItemId
       );
       if (!oldDocumentFileItem) {
         console.warn("No reorder target file provided");
@@ -180,19 +139,19 @@ const Main = () => {
       }
       const newDocumentFile = await createDocumentFromDocumentIndices(
         oldDocumentFileItem.file,
-        newPageIndices,
+        newPageIndices
       );
       const newDocumentFileItem = FileItem.fromFile(newDocumentFile);
       setSelectedItemIds(
         selectedItemIds.map((id) =>
-          id === oldDocumentFileItem.id ? newDocumentFileItem.id : id,
-        ),
+          id === oldDocumentFileItem.id ? newDocumentFileItem.id : id
+        )
       );
       setInspectedItemId(newDocumentFileItem.id);
       setFileItems(
         fileItems.map((item) =>
-          item.id === oldDocumentFileItem.id ? newDocumentFileItem : item,
-        ),
+          item.id === oldDocumentFileItem.id ? newDocumentFileItem : item
+        )
       );
     };
     asyncHelper();
@@ -202,10 +161,14 @@ const Main = () => {
     e.preventDefault();
     e.stopPropagation();
     const documentsToDownload = fileItems.filter((fileItem) =>
-      selectedItemIds.includes(fileItem.id),
+      selectedItemIds.includes(fileItem.id)
     );
     for (const document of documentsToDownload) {
-      download(document.file, document.file.name.slice(0, document.file.name.lastIndexOf('.')) + ".pdf");
+      download(
+        document.file,
+        document.file.name.slice(0, document.file.name.lastIndexOf(".")) +
+          ".pdf"
+      );
     }
   };
 
@@ -213,8 +176,8 @@ const Main = () => {
     e.stopPropagation();
     const newDocument = await merge(fileItems, selectedItemIds, newName);
     console.log(newDocument.file.name);
-    let result = fileItems.filter(
-      (item) => selectedItemIds.indexOf(item.id) === -1,
+    const result = fileItems.filter(
+      (item) => selectedItemIds.indexOf(item.id) === -1
     );
     result.push(newDocument);
     setFileItems(result);
@@ -236,8 +199,8 @@ const Main = () => {
     e.stopPropagation();
     setFileItems(
       fileItems.filter(
-        (fileItem) => selectedItemIds.indexOf(fileItem.id) === -1,
-      ),
+        (fileItem) => selectedItemIds.indexOf(fileItem.id) === -1
+      )
     );
   };
 
@@ -245,7 +208,7 @@ const Main = () => {
     e.stopPropagation();
     setRenameModalState(undefined);
     const currentFileItemIndex = fileItems.findIndex(
-      (fileItem) => fileItem.id === inspectedItemId,
+      (fileItem) => fileItem.id === inspectedItemId
     );
     if (currentFileItemIndex === -1) {
       return;
@@ -257,8 +220,8 @@ const Main = () => {
     const newFileItem = new FileItem(newFile, currentFileItem.id);
     setFileItems(
       fileItems.map((fileItem) =>
-        fileItem.id === inspectedItemId ? newFileItem : fileItem,
-      ),
+        fileItem.id === inspectedItemId ? newFileItem : fileItem
+      )
     );
   };
 
@@ -267,7 +230,9 @@ const Main = () => {
     e.preventDefault();
     const document = fileItems.find((item) => item.id === inspectedItemId);
     setRenameModalState({
-      oldName: document?.file.name.slice(0, document?.file.name.lastIndexOf('.')) ?? "",
+      oldName:
+        document?.file.name.slice(0, document?.file.name.lastIndexOf(".")) ??
+        "",
       onConfirm: onRenameConfirm,
       text: `Rename ${document?.file.name}`,
     });
@@ -275,14 +240,14 @@ const Main = () => {
 
   const onExtractConfirmed = async (indices: number[], newName: string) => {
     const documentFileItem = fileItems.find(
-      (item) => item.id === inspectedItemId,
+      (item) => item.id === inspectedItemId
     );
     if (!documentFileItem) {
       return;
     }
     const newDocumentFile = await createDocumentFromDocumentIndices(
       documentFileItem.file,
-      indices,
+      indices
     );
     const newFile = new File([newDocumentFile], `${newName}.png`, {
       type: documentFileItem.file.type,
@@ -300,23 +265,8 @@ const Main = () => {
     });
   };
 
-  let ActionButtonClassName = "MainPanel-action";
-  if (!selectedItemIds.length) {
-    ActionButtonClassName += " MainPanel-disabledAction";
-  }
-
-  let MergeActionButtonClassName = "MainPanel-action";
-  if (selectedItemIds.length < 2) {
-    MergeActionButtonClassName += " MainPanel-disabledAction";
-  }
-
-  let RenameActionButtonClassName = "MainPanel-action";
-  if (!inspectedItemId) {
-    RenameActionButtonClassName += " MainPanel-disabledAction";
-  }
-
   return (
-    <>
+    <div className="overflow-hidden max-h-screen h-screen">
       {renameModalState && (
         <RenameModal
           {...renameModalState}
@@ -324,71 +274,65 @@ const Main = () => {
         />
       )}
       <form
-        className="App"
+        className="App flex h-full"
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
         onSubmit={(e) => e.preventDefault()}
       >
-        {fileItems.length ? (
-          <Layout
-            layout={inspectedItemId ? layoutType.double : layoutType.single}
-          >
-            <Panel onClick={onClickOutside}>
-              <div className="Panel-content">
-                <div className="MainPanel-header">
-                  <div className="MainPanel-actions">
-                    <div
-                      onClick={onRename}
-                      className={RenameActionButtonClassName}
-                    >
-                      Rename
-                    </div>
-                    <div onClick={onDelete} className={ActionButtonClassName}>
-                      Delete
-                    </div>
-                    <div onClick={onDownload} className={ActionButtonClassName}>
-                      Download
-                    </div>
-                    <div
-                      onClick={onMerge}
-                      className={MergeActionButtonClassName}
-                    >
-                      Merge
-                    </div>
-                  </div>
-                </div>
-                <DocumentList
-                  clickEventRouter={clickEventRouter}
-                  itemList={fileItems}
-                  selectedItemIds={selectedItemIds}
-                  setItemList={(value) => setFileItems(value)}
-                  inspectedItemId={inspectedItemId}
-                />
-              </div>
-              <div className="MainContainer-callToActionContainer">
-                <div
-                  className="MainContent-callToAction"
-                  onClick={onFileInputClick}
-                >
-                  <h3>Drag or click to add more files</h3>
-                </div>
-              </div>
-            </Panel>
-            {inspectedItemId && (
-              <Panel>
-                <DocumentManager
-                  handleExtract={onPagesExtract}
-                  handleCommit={handleCommit}
-                  fileItem={fileItems.find(
-                    (item) => item.id === inspectedItemId,
-                  )}
-                />
-              </Panel>
+        <div onClick={onClickOutside} className="flex flex-col bg-white panel-shadow py-4 gap-4">
+          <div className="flex gap-4 px-4">
+            <div
+              onClick={onRename}
+              className={clsx("px-4 py-2 rounded-sm bg-[#ddd] cursor-pointer btn-shadow", !inspectedItemId && "text-gray-400 cursor-no-drop")}
+            >
+              Rename
+            </div>
+            <div
+              onClick={onDelete}
+              className={clsx("px-4 py-2 rounded-sm bg-[#ddd] cursor-pointer btn-shadow", !selectedItemIds.length && "text-gray-400 cursor-no-drop")}
+            >
+              Delete
+            </div>
+            <div
+              onClick={onDownload}
+              className={clsx("px-4 py-2 rounded-sm bg-[#ddd] cursor-pointer btn-shadow", !selectedItemIds.length && "text-gray-400 cursor-no-drop")}
+            >
+              Download
+            </div>
+            <div
+              onClick={onMerge}
+              className={clsx("px-4 py-2 rounded-sm bg-[#ddd] cursor-pointer btn-shadow", selectedItemIds.length < 2 && "text-gray-400 cursor-no-drop")}
+            >
+              Merge
+            </div>
+          </div>
+          <div className="flex-1 overflow-scroll p-4">
+            <DocumentList
+              clickEventRouter={clickEventRouter}
+              itemList={fileItems}
+              selectedItemIds={selectedItemIds}
+              setItemList={(value) => setFileItems(value)}
+              inspectedItemId={inspectedItemId}
+            />
+          </div>
+          <div className="flex justify-center items-center">
+            <button
+              className="px-8 py-4 rounded-sm bg-[#ddd] cursor-pointer btn-shadow"
+              onClick={onFileInputClick}
+            >
+              <h3>Drag or click to add more files</h3>
+            </button>
+          </div>
+        </div>
+        <div className="flex flex-col bg-white panel-shadow py-4 gap-4 flex-1">
+          <DocumentManager
+            handleExtract={onPagesExtract}
+            handleCommit={handleCommit}
+            fileItem={fileItems.find(
+              (item) => item.id === inspectedItemId
             )}
-          </Layout>
-        ) : (
-          <EmptyDocumentList onClick={onFileInputClick} />
-        )}
+          />
+        </div>
         <input
           multiple
           style={{ display: "none" }}
@@ -397,7 +341,7 @@ const Main = () => {
           onChange={onFileInputChange}
         />
       </form>
-    </>
+    </div>
   );
 };
 
